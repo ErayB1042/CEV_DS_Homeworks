@@ -1,0 +1,87 @@
+decleration_odev.py
+
+from sqlalchemy import Column,ForeignKey,Integer,String
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import relationship
+from sqlalchemy import create_engine
+
+Base=declarative_base()
+
+class logins(Base):
+    __tablename__ = 'login_tablosu'
+    __table_args__ = {'extend_existing': True}
+
+    id = Column(Integer, primary_key = True)
+    email = Column(String(50),)
+    password = Column(String(50))
+
+engine=create_engine("postgresql://postgres:318295@localhost:5432/postgres")
+
+Base.metadata.create_all(engine)
+
+
+
+
+
+
+
+
+
+
+
+#############################################################################################
+insert_odev.py
+
+
+
+
+
+from decleration_odev import logins,Base
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy import Column, ForeignKey, Integer, String
+import psycopg2
+import random
+from faker import Faker
+from faker.providers import BaseProvider
+import itertools
+
+
+engine=create_engine("postgresql://postgres:318295@localhost:5432/postgres")
+Base.metadata.bind=engine
+
+DBSession =sessionmaker(bind=engine)
+session=DBSession()
+
+f = Faker('tr_TR')
+
+def kayıt():
+    email_full = []
+    password_full = []
+    for _ in range(1):
+      email_full.append(f.email())
+      password_full.append(f.password())
+
+    person = logins(email = email_full[0], password = password_full[0])
+    session.add(person)
+#10000 veri kaydetme.
+num = 10000
+for _ in itertools.repeat(0, num):
+    kayıt()
+session.commit()
+
+#10000 içinden 1000 adet veri çektim ve bunları email ve password olmak üzere dictionary'e ekledim.
+data_dict={}
+nums=list(range(1,10001))
+random.shuffle(nums)
+print(nums)
+for i in nums[1:999]:
+    data = session.query(logins).filter(logins.id == i).first()
+    data_dict[data.email] = data.password
+print(data_dict)
+#9000 fazladan veri oluşturup dictionary'e ekledim.
+def kayıt_dict(numb):
+    for _ in range(numb):
+      data_dict[f.email()] = f.password()
+kayıt_dict(9000)
